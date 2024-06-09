@@ -1,3 +1,14 @@
+document.addEventListener("DOMContentLoaded",() =>{
+    axios
+    .get("https://crudcrud.com/api/ec229e4edeca4e1594e0ce73e75ac527/AppointmentData")
+    .then((response) =>{
+        response.data.forEach((obj) => {
+            addUserToList(obj);
+        });
+    })
+    .catch((err) => console.log(err))
+});
+
 function handleFormSubmit(event) {
     event.preventDefault();
 
@@ -11,64 +22,55 @@ function handleFormSubmit(event) {
       phone
     };
 
+    axios
+    .post("https://crudcrud.com/api/ec229e4edeca4e1594e0ce73e75ac527/AppointmentData",obj)
+    .then((response) => {
+        addUserToList(response.data);
+    })
+    .catch((error) => console.log(error))
+
     localStorage.setItem(email, JSON.stringify(obj));
-    addUserToList(obj);
     event.target.reset();
 }
+
 function addUserToList(user){
-    const ultag = document.querySelector("ul");
+
     const newLi = document.createElement("li");
-    const newLiText = document.createTextNode(user.username + " - " + user.email + " - " + user.phone);
-    newLi.appendChild(newLiText);
-    ultag.appendChild(newLi)
+    newLi.appendChild(
+        document.createTextNode(
+            `${user.username} - ${user.email} - ${user.phone}`
+        )
+    );
 
-    const delButton = document.createElement("input");
-    delButton.setAttribute("type","button");
-    delButton.setAttribute("value","Delete");
-    delButton.setAttribute("dataemail",user.email);
-    const delButtonText = document.createTextNode("Delete");
-    delButton.appendChild(delButtonText);
-    delButton.addEventListener('click',handleDelete);
-    newLi.appendChild(delButton);
+    const delbtn = document.createElement("button");
+    delbtn.appendChild(document.createTextNode("Delete"));
+    newLi.appendChild(delbtn);
 
-    const editButton = document.createElement("input");
-    editButton.setAttribute("type","button");
-    editButton.setAttribute("value","Edit");
-    editButton.dataset.email = user.email;
-    const editButtonText = document.createTextNode("Edit");
-    editButton.appendChild(editButtonText);
-    editButton.addEventListener('click',handleEdit);
-    newLi.appendChild(editButton);
-
-}
-
-
-function handleDelete(event){
-    const listOfItems = document.querySelector("#listOfItems");
+    const editbtn = document.createElement("button");
+    editbtn.appendChild(document.createTextNode("Edit"));
+    newLi.appendChild(editbtn);
     
-        if(event.target.value === "Delete"){
-            const deleteEle = event.target.parentElement;
-            const deleteKey = event.target.getAttribute("dataemail");
-            console.log(deleteKey);
-            listOfItems.removeChild(deleteEle);
-            localStorage.removeItem(deleteKey);
-            
-        }
-}
+    const ultag = document.querySelector("ul");
+    ultag.appendChild(newLi);
 
-function handleEdit(event){
-    
-    if(event.target.value === "Edit"){
-        const editEle = event.target.parentElement;
-            // const delKey = event.target.getAttribute("dataemail");            const emailkey = event.target.dataset.email;
-        console.log(event.target.dataset.email);
-        const user = JSON.parse(localStorage.getItem(event.target.dataset.email));
-        if (user){
-            document.querySelector('#username').value = user.username;
-            document.querySelector('#email').value = user.email;
-            document.querySelector('#phone').value = user.phone;
-            localStorage.removeItem(event.target.dataset.email);
-            listOfItems.removeChild(editEle);
-        }
-    }
+    delbtn.addEventListener("click", function(){
+        axios
+        .delete(`https://crudcrud.com/api/ec229e4edeca4e1594e0ce73e75ac527/AppointmentData/${user._id}`)
+        .then(() =>{
+            ultag.removeChild(newLi);
+        })
+        .catch((error) => console.log(error))
+    });
+
+    editbtn.addEventListener("click", function(){
+        document.getElementById("username").value = user.username;
+        document.getElementById("email").value = user.email;
+        document.getElementById("phone").value = user.phone;
+
+        ultag.removeChild(newLi);
+        axios
+        .delete(`https://crudcrud.com/api/ec229e4edeca4e1594e0ce73e75ac527/AppointmentData/${user._id}`)
+        .then((response) => console.log(response))
+        .catch((error) => console.log(error))
+    });
 }
