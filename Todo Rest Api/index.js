@@ -102,3 +102,4 @@ function checkPendingList(pendingList) {
             msgexist.remove();
         }
     }
+}
